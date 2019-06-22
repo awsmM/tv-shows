@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <title>tv shows</title>
+</head>
+
+<body>
+
+  <!-- root app -->
+
+  <div id="app">
+    <div>
+      <user-form></user-form>
+    </div>
+  </div>
+
+  <!-- end -->
+
+  <!--user form -->
+  <template id="userForm">
+    <div>
+      <div class="form-group">
+        <label for="showTitle"></label>
+        <input type="text" id="showTitle" class="form-control" placeholder="Search for TV Shows" v-model="showTitle"
+          @keyup.enter="getTVshows()" />
+      </div>
+      <br>
+
+      <div>
+        <a v-for="img in shows">
+          <img :src="img.show.image.medium">
+        </a>
+
+      </div>
+    </div>
+  </template>
+  <!-- end -->
+
+
+  <script>
+
+    /*form Summary Component*/
+    const userform = Vue.component('user-form', {
+      template: '#userForm',
+      data: function () {
+        return {
+          showTitle: '',
+          shows: []
+        }
+      },
+
+      methods: {
+        async getTVshows() {
+
+          const seek = fetch(`/tvshows/${this.showTitle}`)
+            .catch(err => console.log(err))
+          const found = await seek.then(value => value.json())
+          this.shows = found;
+        }
+      }
+    })
+    /*end*/
+
+
+    new Vue({
+      el: '#app',
+      data: {
+        message: 'I am a vue instance'
+      },
+      methods: {
+        test() {
+          console.log(this.message);
+        }
+      }
+    })
+  </script>
+
+</body>
+
+</html>
