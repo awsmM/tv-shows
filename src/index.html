@@ -2,22 +2,15 @@
 <html lang="en">
 
 <head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.1.1/vuex.min.js"></script>
   <title>tv shows</title>
 </head>
 
 <body>
-
-  <!-- root app -->
-
-  <div id="app">
-    <div>
-      <user-form></user-form>
-    </div>
-  </div>
-
-  <!-- end -->
-
   <!--user form -->
   <template id="userForm">
     <div>
@@ -29,25 +22,76 @@
       <br>
 
       <div>
-        <a v-for="img in shows">
-          <img :src="img.show.image.medium">
-        </a>
+        <!-- <li>
+          <img height="" width="" :src="show.show.image.medium" @click="getSeason(show.show.id)">
+        </li> {{selectSeasons}} -->
+
+        <div class="container">
+          <div class="wrapper">
+            <div class="" v-for="show in selectShows">
+              <img height="" width="" :src="show.show.image.medium" @click="getSeason(show.show.id)">
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
   </template>
   <!-- end -->
 
+  <!--user form -->
+  <template id="seasons">
+    <div>
+      {{searchNum}}
+    </div>
+  </template>
+  <!-- end -->
 
+  <!-- root app -->
+
+  <div id="app">
+    <div class="container">
+      <search-input></search-input>
+      <show-seasons></show-seasons>
+    </div>
+  </div>
+
+  <!-- end -->
+
+  <!-- script -->
   <script>
+    /*Vuex store*/
+    const store = new Vuex.Store({
+      state: {
+        getShows: [],
+        getSeasons: [],
+        espisodes: [],
+        selectedId: 0
+      },
+      mutations: {
+        updateShows(state, payload) {
+          state.getShows = []
+          state.getShows = state.getShows.concat(payload);
+        },
+        updateSeasons(state, payload) {
+          state.getSeasons = []
+          state.getSeasons = state.getSeasons.concat(payload);
+        },
 
-    /*form Summary Component*/
-    const userform = Vue.component('user-form', {
+
+      }
+    })
+    /*end*/
+
+
+    /*user form Component*/
+    const searchComponent = Vue.component('search-input', {
       template: '#userForm',
       data: function () {
         return {
           showTitle: '',
-          shows: []
+          shows: [],
+          showID: 0
         }
       },
 
@@ -58,8 +102,45 @@
             .catch(err => console.log(err))
           const found = await seek.then(value => value.json())
           this.shows = found;
+          this.$store.commit('updateShows', this.shows)
+        },
+
+        async getSeason(id) {
+
+          const seasons = fetch(`/seasons/${id}`)
+            .catch(err => console.log(err))
+          const foundSeasons = await seasons.then(value => value.json())
+          this.$store.commit('updateSeasons', foundSeasons)
+          console.log(foundSeasons)
+        }
+      },
+
+      computed: {
+        selectShows: {
+          get: function () {
+            return this.$store.state.getShows
+          }
+        },
+        selectSeasons: {
+          get: function () {
+            return this.$store.state.getSeasons
+          }
         }
       }
+    })
+    /*end*/
+
+
+
+    /*Seasons Component*/
+    const display = Vue.component('show-seasons', {
+      template: '#seasons',
+      props: ['searchNum'],
+      data: function () {
+        return {
+          message: ''
+        }
+      },
     })
     /*end*/
 
@@ -67,16 +148,38 @@
     new Vue({
       el: '#app',
       data: {
-        message: 'I am a vue instance'
+        num: 0
       },
       methods: {
-        test() {
-          console.log(this.message);
+        sendID(id) {
+
+          this.num = id;
+          console.log(this.num);
         }
-      }
+      },
+      store,
+      components: { searchComponent }
     })
   </script>
 
+  <style>
+    .wrapper {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-column-gap: 5px;
+      grid-row-gap: 10px
+    }
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
 </body>
 
 </html>

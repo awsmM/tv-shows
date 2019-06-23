@@ -4,6 +4,8 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
+app.use(express.static(path.join(__dirname, "/public")));
+
 const find = async function (url) {
   const seek = fetch(url)
   const response = await seek.then(value => value.json())
@@ -37,9 +39,10 @@ app.get('/', (req, res) => {
 app.get('/tvshows/:showName', async (req, res) => {
 
   const tvShows = find(`http://api.tvmaze.com/search/shows?q=${req.params.showName}`)
-  const result = await tvShows.then(value => value);
+  const tvShowArr = await tvShows.then(value => value);
 
-  res.json(result);
+
+  res.json(tvShowArr);
 });
 
 
